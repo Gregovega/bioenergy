@@ -150,9 +150,18 @@ export default async function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {(equipos ?? []).map((eq) => {
-                const asignacionActiva = Array.isArray(eq.asignacion)
-                  ? eq.asignacion.find((a) => a.estado === 'activa')
+              {(equipos ?? []).map((eq: any) => {
+                const asignacionRaw = Array.isArray(eq.asignacion)
+                  ? eq.asignacion.find((a: any) => a.estado === 'activa')
+                  : null
+
+                const asignacionActiva = asignacionRaw
+                  ? {
+                      ...asignacionRaw,
+                      cliente_final: Array.isArray(asignacionRaw.cliente_final)
+                        ? asignacionRaw.cliente_final[0] ?? null
+                        : asignacionRaw.cliente_final ?? null,
+                    }
                   : null
 
                 return (
