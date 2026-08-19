@@ -22,6 +22,15 @@ export default async function ClientePage() {
         .limit(10),
     ])
 
+  const asignacionNormalizada = asignacion
+    ? {
+        ...asignacion,
+        equipo: Array.isArray((asignacion as any).equipo)
+          ? (asignacion as any).equipo[0] ?? null
+          : (asignacion as any).equipo ?? null,
+      }
+    : null
+
   const estadoColor =
     cliente?.estado_servicio === 'activo'
       ? 'bg-signal/10 text-signal'
@@ -40,7 +49,7 @@ export default async function ClientePage() {
             <div className="mt-2 flex items-center gap-2">
               <Zap className="h-4 w-4 text-accent" />
               <span className="font-mono text-sm text-ink">
-                {asignacion?.equipo?.numero_serie ?? 'Sin equipo asignado'}
+                {asignacionNormalizada?.equipo?.numero_serie ?? 'Sin equipo asignado'}
               </span>
             </div>
           </div>
@@ -67,12 +76,12 @@ export default async function ClientePage() {
         </div>
       )}
 
-      {asignacion && cliente && (
+      {asignacionNormalizada && cliente && (
         <FormularioReportarPago
           clienteId={cliente.id}
-          asignacionId={asignacion.id}
+          asignacionId={asignacionNormalizada.id}
           userId={user!.id}
-          mensualidadSugerida={Number(asignacion.mensualidad_usd)}
+          mensualidadSugerida={Number(asignacionNormalizada.mensualidad_usd)}
         />
       )}
 
