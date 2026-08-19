@@ -31,7 +31,7 @@ const ETIQUETAS_TIPO: Record<string, { label: string; color: string }> = {
   credito_margen_empresa: { label: 'Margen Empresa', color: 'text-muted' },
 }
 
-export function BilleteraDesglose({ inversionistaId }: Props) {
+export default function BilleteraDesglose({ inversionistaId }: Props) {
   const [movimientos, setMovimientos] = useState<MovimientoBilletera[]>([])
   const [cargando, setCargando] = useState(true)
   const [esFundador, setEsFundador] = useState(false)
