@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Zap } from 'lucide-react'
+import { AdminNav } from '@/components/admin/admin-nav'
 
 export default async function AdminLayout({
   children,
@@ -22,6 +23,9 @@ export default async function AdminLayout({
           <Zap className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg tracking-tight">Mothership</span>
           <span className="ml-auto text-sm text-muted">{user.email}</span>
+        </div>
+        <div className="mx-auto max-w-7xl px-6 pb-3">
+          <AdminNav />
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
