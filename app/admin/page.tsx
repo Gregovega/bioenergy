@@ -24,14 +24,39 @@ export default async function AdminDashboardPage() {
   ])
 
   const pagosConComprobanteFirmado = await Promise.all(
-    (pagosPendientes ?? []).map(async (pago) => {
-      if (!pago.comprobante_url) return { ...pago, comprobante_url_firmada: null }
+    (pagosPendientes ?? []).map(async (pago: any) => {
+      const clienteFinal = Array.isArray(pago.cliente_final)
+        ? pago.cliente_final[0] ?? null
+        : pago.cliente_final ?? null
 
-      const { data } = await supabase.storage
-        .from('comprobantes')
-        .createSignedUrl(pago.comprobante_url, 3600) // 1 hora de validez
+      const asignacionRaw = Array.isArray(pago.asignacion)
+        ? pago.asignacion[0] ?? null
+        : pago.asignacion ?? null
 
-      return { ...pago, comprobante_url_firmada: data?.signedUrl ?? null }
+      const equipo = asignacionRaw
+        ? Array.isArray(asignacionRaw.equipo)
+          ? asignacionRaw.equipo[0] ?? null
+          : asignacionRaw.equipo ?? null
+        : null
+
+      let comprobante_url_firmada: string | null = null
+      if (pago.comprobante_url) {
+        const { data } = await supabase.storage
+          .from('comprobantes')
+          .createSignedUrl(pago.comprobante_url, 3600) // 1 hora de validez
+        comprobante_url_firmada = data?.signedUrl ?? null
+      }
+
+      return {
+        id: pago.id,
+        monto_usd: pago.monto_usd,
+        periodo: pago.periodo,
+        comprobante_url: pago.comprobante_url,
+        comprobante_url_firmada,
+        created_at: pago.created_at,
+        cliente_final: clienteFinal,
+        asignacion: asignacionRaw ? { equipo } : null,
+      }
     })
   )
 
