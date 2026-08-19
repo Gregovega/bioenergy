@@ -22,13 +22,18 @@ export default async function InversionistaPage() {
       supabase.from('vista_inversionista_devengado_diario').select('*'),
     ])
 
+  const fraccionesNormalizadas = (fracciones ?? []).map((f: any) => ({
+    ...f,
+    equipo: Array.isArray(f.equipo) ? f.equipo[0] ?? null : f.equipo ?? null,
+  }))
+
   const saldoDisponible = (movimientos ?? []).reduce((acc, m) => {
     if (m.tipo === 'credito_dividendo') return acc + Number(m.monto_usd)
     if (m.tipo === 'retiro') return acc - Number(m.monto_usd)
     return acc
   }, 0)
 
-  const totalInvertido = (fracciones ?? []).reduce(
+  const totalInvertido = fraccionesNormalizadas.reduce(
     (acc, f) => acc + Number(f.monto_aportado_usd),
     0
   )
@@ -87,7 +92,7 @@ export default async function InversionistaPage() {
               </tr>
             </thead>
             <tbody>
-              {(fracciones ?? []).map((f) => (
+              {fraccionesNormalizadas.map((f) => (
                 <tr key={f.id} className="border-b border-line last:border-0">
                   <td className="px-4 py-3 font-mono text-ink">
                     {f.equipo?.numero_serie ?? '—'}
@@ -108,7 +113,7 @@ export default async function InversionistaPage() {
                   </td>
                 </tr>
               ))}
-              {(fracciones ?? []).length === 0 && (
+              {fraccionesNormalizadas.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-muted">
                     Todavía no tienes fracciones activas.
