@@ -1,12 +1,11 @@
 // =============================================================
-// COMPONENTE: admin-categoria-socio.tsx
+// COMPONENTE: admin-categoria-socio.tsx (v2 — fases dinámicas)
 // PORTAL: Mothership (staff/admin)
 // QUÉ HACE:
-//  1) Lista los inversionistas y permite cambiar su
-//     categoria_socio ('fundador' | 'fase_2' | 'regular').
+//  1) Lista los inversionistas y permite asignarles una fase
+//     (fase_inversion_id) en vez de la categoría fija anterior.
 //  2) Incluye el campo de bono (CampoBonoFundadores) para
-//     insertar en el formulario de creación/edición de una
-//     asignación, donde se define monto_bono_fundadores_usd.
+//     insertar en el formulario de asignación.
 // =============================================================
 
 'use client'
@@ -18,45 +17,53 @@ type Inversionista = {
   id: string
   nombre: string
   email: string
-  categoria_socio: 'fundador' | 'fase_2' | 'regular'
+  fase_inversion_id: string | null
 }
 
-const OPCIONES_CATEGORIA: Array<{ value: Inversionista['categoria_socio']; label: string }> = [
-  { value: 'fundador', label: 'Fundador' },
-  { value: 'fase_2', label: 'Fase 2' },
-  { value: 'regular', label: 'Regular' },
-]
+type Fase = {
+  id: string
+  orden: number
+  nombre: string
+}
 
 export function ListaInversionistasCategoria() {
   const [inversionistas, setInversionistas] = useState<Inversionista[]>([])
+  const [fases, setFases] = useState<Fase[]>([])
   const [guardandoId, setGuardandoId] = useState<string | null>(null)
   const [busqueda, setBusqueda] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
     async function cargar() {
-      const { data } = await supabase
-        .from('inversionista')
-        .select('id, nombre, email, categoria_socio')
-        .order('nombre', { ascending: true })
-      setInversionistas(data ?? [])
+      const [{ data: invs }, { data: fasesData }] = await Promise.all([
+        supabase
+          .from('inversionista')
+          .select('id, nombre, email, fase_inversion_id')
+          .order('nombre', { ascending: true }),
+        supabase
+          .from('fase_inversion')
+          .select('id, orden, nombre')
+          .order('orden', { ascending: true }),
+      ])
+      setInversionistas(invs ?? [])
+      setFases(fasesData ?? [])
     }
     cargar()
   }, [supabase])
 
-  async function actualizarCategoria(id: string, nuevaCategoria: Inversionista['categoria_socio']) {
+  async function actualizarFase(id: string, nuevaFaseId: string) {
     setGuardandoId(id)
     const { error } = await supabase
       .from('inversionista')
-      .update({ categoria_socio: nuevaCategoria })
+      .update({ fase_inversion_id: nuevaFaseId || null })
       .eq('id', id)
 
     if (!error) {
       setInversionistas((prev) =>
-        prev.map((inv) => (inv.id === id ? { ...inv, categoria_socio: nuevaCategoria } : inv))
+        prev.map((inv) => (inv.id === id ? { ...inv, fase_inversion_id: nuevaFaseId || null } : inv))
       )
     } else {
-      alert('No se pudo actualizar la categoría: ' + error.message)
+      alert('No se pudo actualizar la fase: ' + error.message)
     }
     setGuardandoId(null)
   }
@@ -70,10 +77,10 @@ export function ListaInversionistasCategoria() {
   return (
     <div className="overflow-hidden rounded-lg border border-line bg-surface">
       <div className="border-b border-line px-6 py-4">
-        <h3 className="font-display text-sm text-ink">Categoría de socio por inversionista</h3>
+        <h3 className="font-display text-sm text-ink">Fase de inversión por inversionista</h3>
         <p className="mt-1 text-xs text-muted">
-          Los inversionistas marcados como &quot;Fundador&quot; reciben el Bono de Expansión del
-          Ecosistema cuando una asignación lo tenga configurado.
+          Los inversionistas vinculados a una fase reciben el Bono de Expansión del Ecosistema
+          según el % configurado en esa fase, cuando una asignación lo tenga configurado.
         </p>
         <input
           type="text"
@@ -88,7 +95,7 @@ export function ListaInversionistasCategoria() {
           <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
             <th className="px-6 py-3 font-medium">Nombre</th>
             <th className="px-6 py-3 font-medium">Email</th>
-            <th className="px-6 py-3 font-medium">Categoría</th>
+            <th className="px-6 py-3 font-medium">Fase</th>
           </tr>
         </thead>
         <tbody>
@@ -98,16 +105,15 @@ export function ListaInversionistasCategoria() {
               <td className="px-6 py-3 text-muted">{inv.email}</td>
               <td className="px-6 py-3">
                 <select
-                  value={inv.categoria_socio}
+                  value={inv.fase_inversion_id ?? ''}
                   disabled={guardandoId === inv.id}
-                  onChange={(e) =>
-                    actualizarCategoria(inv.id, e.target.value as Inversionista['categoria_socio'])
-                  }
+                  onChange={(e) => actualizarFase(inv.id, e.target.value)}
                   className="rounded-lg border border-line bg-base px-3 py-1.5 text-sm text-ink disabled:opacity-50"
                 >
-                  {OPCIONES_CATEGORIA.map((op) => (
-                    <option key={op.value} value={op.value}>
-                      {op.label}
+                  <option value="">Sin fase (regular)</option>
+                  {fases.map((fase) => (
+                    <option key={fase.id} value={fase.id}>
+                      Fase {fase.orden} — {fase.nombre}
                     </option>
                   ))}
                 </select>
@@ -131,14 +137,15 @@ export function ListaInversionistasCategoria() {
 
 // -------------------------------------------------------------
 // Sub-componente: campo de bono dentro del formulario de asignación
-// Insértalo donde ya tengas los campos mensualidad_usd,
-// monto_pool_inversionistas_usd, monto_fondo_operativo_usd, etc.
+// (sin cambios respecto a la versión anterior — sigue siendo un
+// monto en dólares que el trigger reparte automáticamente entre
+// todas las fases vigentes según su % configurado)
 // -------------------------------------------------------------
 type CampoBonoProps = {
   montoBono: number
   onChange: (valor: number) => void
   mensualidad: number
-  sumaOtrosMontos: number // pool + fondo operativo + margen empresa
+  sumaOtrosMontos: number
 }
 
 export function CampoBonoFundadores({
@@ -166,7 +173,7 @@ export function CampoBonoFundadores({
       <p className={`mt-1 text-[11px] ${excedeLimite ? 'text-red-500' : 'text-muted'}`}>
         {excedeLimite
           ? `Excede el monto disponible ($${disponible.toFixed(2)}). La base de datos rechazará este valor.`
-          : `Disponible sin superar la mensualidad: $${disponible.toFixed(2)}`}
+          : `Este monto se reparte automáticamente entre todas las fases vigentes, según el % de cada una.`}
       </p>
     </div>
   )
