@@ -2,16 +2,18 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, PlusCircle } from 'lucide-react'
+import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus } from 'lucide-react'
 
 // -------------------------------------------------------------
 // Para agregar una ruta nueva al menú del Mothership, solo hay
-// que agregar un objeto aquí. Cuando construyas /admin/equipos,
-// /admin/clientes, /admin/pagos, etc., van aquí.
+// que agregar un objeto aquí. Cuando construyas /admin/pagos,
+// etc., van aquí.
 // -------------------------------------------------------------
 const ENLACES = [
   { href: '/admin', label: 'Panel general', icon: LayoutDashboard, exact: true },
   { href: '/admin/categorias', label: 'Categorías de socio', icon: Users, exact: false },
+  { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false },
+  { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false },
   { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false },
 ]
 
