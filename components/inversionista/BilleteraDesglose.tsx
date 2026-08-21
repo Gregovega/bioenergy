@@ -1,10 +1,10 @@
 // =============================================================
-// COMPONENTE: billetera-desglose.tsx
+// COMPONENTE: BilleteraDesglose.tsx (v2 — fases dinámicas)
 // PORTAL: Inversionista
 // QUÉ HACE: Muestra el balance de billetera del inversionista,
 // separando el dividendo normal del "Bono de Expansión del
-// Ecosistema" (solo aplica a inversionistas con
-// categoria_socio = 'fundador').
+// Ecosistema" (aplica a cualquier inversionista vinculado a una
+// fase de inversión, mostrando el nombre de su fase).
 // =============================================================
 
 'use client'
@@ -26,7 +26,7 @@ type Props = {
 
 const ETIQUETAS_TIPO: Record<string, { label: string; color: string }> = {
   credito_dividendo: { label: 'Dividendo', color: 'text-signal' },
-  credito_bono_expansion: { label: 'Bono de Expansión (Fundador)', color: 'text-accent' },
+  credito_bono_expansion: { label: 'Bono de Expansión', color: 'text-accent' },
   credito_fondo_operativo: { label: 'Fondo Operativo', color: 'text-muted' },
   credito_margen_empresa: { label: 'Margen Empresa', color: 'text-muted' },
 }
@@ -34,7 +34,7 @@ const ETIQUETAS_TIPO: Record<string, { label: string; color: string }> = {
 export default function BilleteraDesglose({ inversionistaId }: Props) {
   const [movimientos, setMovimientos] = useState<MovimientoBilletera[]>([])
   const [cargando, setCargando] = useState(true)
-  const [esFundador, setEsFundador] = useState(false)
+  const [nombreFase, setNombreFase] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -43,11 +43,13 @@ export default function BilleteraDesglose({ inversionistaId }: Props) {
 
       const { data: inv } = await supabase
         .from('inversionista')
-        .select('categoria_socio')
+        .select('fase_inversion_id, fase_inversion(nombre)')
         .eq('id', inversionistaId)
         .single()
 
-      setEsFundador(inv?.categoria_socio === 'fundador')
+      const fase = inv?.fase_inversion as { nombre: string } | { nombre: string }[] | null
+      const nombreDeFase = Array.isArray(fase) ? fase[0]?.nombre ?? null : fase?.nombre ?? null
+      setNombreFase(nombreDeFase)
 
       const { data: movs } = await supabase
         .from('billetera_movimiento')
@@ -86,9 +88,9 @@ export default function BilleteraDesglose({ inversionistaId }: Props) {
     <div className="rounded-lg border border-line bg-surface p-6">
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted">Balance total generado</h3>
-        {esFundador && (
+        {nombreFase && (
           <span className="rounded-full bg-accent/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent">
-            Socio Fundador
+            {nombreFase}
           </span>
         )}
       </div>
@@ -100,7 +102,7 @@ export default function BilleteraDesglose({ inversionistaId }: Props) {
           <p className="mb-1 text-xs text-muted">Dividendos</p>
           <p className="font-mono text-lg text-signal">${totalDividendos.toFixed(2)}</p>
         </div>
-        {esFundador && (
+        {nombreFase && (
           <div>
             <p className="mb-1 text-xs text-muted">Bono de Expansión</p>
             <p className="font-mono text-lg text-accent">${totalBono.toFixed(2)}</p>
