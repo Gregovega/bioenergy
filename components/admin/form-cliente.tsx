@@ -18,6 +18,7 @@ export function FormCliente() {
 
   const [nombre, setNombre] = useState('')
   const [cedula, setCedula] = useState('')
+  const [telefono, setTelefono] = useState('')
   const [direccion, setDireccion] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -35,6 +36,7 @@ export function FormCliente() {
     const { error: errInsert } = await supabase.from('cliente_final').insert({
       nombre: nombre.trim(),
       cedula: cedula.trim() || null,
+      telefono: telefono.trim() || null,
       direccion_fisica: direccion.trim() || null,
       estado_kyc: 'pendiente',
       estado_servicio: 'activo',
@@ -71,6 +73,17 @@ export function FormCliente() {
             value={cedula}
             onChange={(e) => setCedula(e.target.value)}
             placeholder="V-12345678"
+            className="w-full rounded-lg border border-line bg-base px-3 py-2 text-sm text-ink"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted">Teléfono</label>
+          <input
+            type="text"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            placeholder="0414-1234567"
             className="w-full rounded-lg border border-line bg-base px-3 py-2 text-sm text-ink"
           />
         </div>
