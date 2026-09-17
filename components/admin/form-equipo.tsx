@@ -26,7 +26,6 @@ export function FormEquipo() {
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const cantidadFracciones = costoTotal > 0 ? Math.floor(costoTotal / 100) : 0
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault()
@@ -127,8 +126,8 @@ export function FormEquipo() {
           />
           <p className="mt-1 text-[11px] text-muted">
             {costoTotal > 0
-              ? `Este equipo tendrá ${cantidadFracciones} fracciones disponibles ($100 c/u).`
-              : 'Cada $100 de costo equivale a una fracción disponible para inversionistas.'}
+              ? `Este equipo tendrá $${costoTotal.toFixed(2)} disponibles para participaciones de inversionistas.`
+              : 'El costo total determina cuánto pueden aportar los inversionistas en participaciones.'}
           </p>
         </div>
 
