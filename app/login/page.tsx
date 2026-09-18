@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
 
     // La página raíz "/" decide a qué portal redirigir según el rol.
-    router.push('/')
+    router.push('/portal')
     router.refresh()
   }
 
