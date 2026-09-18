@@ -47,9 +47,14 @@ export function FormFraccion() {
 
   const [inversionistaId, setInversionistaId] = useState('')
   const [equipoId, setEquipoId] = useState('')
-  const [montoAportado, setMontoAportado] = useState(0)
+  // Se guarda como TEXTO, no como número: si fuera número, el campo arranca
+  // en 0 y al escribir encima queda "050000". Como texto, el campo puede
+  // quedar vacío y el 0 inicial desaparece al escribir.
+  const [montoTexto, setMontoTexto] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const montoAportado = Number(montoTexto) || 0
 
   useEffect(() => {
     async function cargar() {
@@ -210,8 +215,9 @@ export function FormFraccion() {
             type="number"
             step="0.01"
             min={0}
-            value={montoAportado}
-            onChange={(e) => setMontoAportado(Number(e.target.value))}
+            value={montoTexto}
+            onChange={(e) => setMontoTexto(e.target.value)}
+            placeholder="0.00"
             className="w-full rounded-lg border border-line bg-base px-3 py-2 text-sm text-ink"
           />
           {inversionistaId && montoAportado > 0 && (
