@@ -15,7 +15,7 @@ const ENLACES = [
   { href: '/admin/categorias', label: 'Categorías de socio', icon: Users, exact: false },
   { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false },
   { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false },
-  { href: '/admin/fracciones/nueva', label: 'Nueva fracción', icon: Coins, exact: false },
+  { href: '/admin/fracciones/nueva', label: 'Nueva participación', icon: Coins, exact: false },
   { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false },
 ]
 
