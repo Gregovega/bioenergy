@@ -12,7 +12,7 @@ export default async function InversionistaPage() {
       supabase.from('inversionista').select('id, nombre, estado_kyc').eq('user_id', user!.id).single(),
       supabase
         .from('fraccion')
-        .select('id, monto_aportado_usd, porcentaje_propiedad, estado, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
+        .select('id, monto_aportado_usd, porcentaje_propiedad, precio_entrada_usd, cantidad_participaciones, estado, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
         .eq('estado', 'activa'),
       supabase
         .from('billetera_movimiento')
@@ -35,6 +35,11 @@ export default async function InversionistaPage() {
 
   const totalInvertido = fraccionesNormalizadas.reduce(
     (acc, f) => acc + Number(f.monto_aportado_usd),
+    0
+  )
+
+  const totalParticipaciones = fraccionesNormalizadas.reduce(
+    (acc, f) => acc + Number(f.cantidad_participaciones ?? 0),
     0
   )
 
@@ -79,7 +84,12 @@ export default async function InversionistaPage() {
       {inversionista?.id && <BilleteraDesglose inversionistaId={inversionista.id} />}
 
       <section>
-        <h2 className="mb-4 font-display text-lg text-ink">Mis fracciones activas</h2>
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="font-display text-lg text-ink">Mis participaciones activas</h2>
+          <span className="font-mono text-sm text-accent">
+            {totalParticipaciones.toFixed(2)} participaciones en total
+          </span>
+        </div>
         <div className="overflow-hidden rounded-lg border border-line bg-surface">
           <table className="w-full text-left text-sm">
             <thead>
@@ -87,6 +97,8 @@ export default async function InversionistaPage() {
                 <th className="px-4 py-3 font-medium">Equipo</th>
                 <th className="px-4 py-3 font-medium">Capacidad</th>
                 <th className="px-4 py-3 font-medium">Estado</th>
+                <th className="px-4 py-3 font-medium">Participaciones</th>
+                <th className="px-4 py-3 font-medium">Precio pagado</th>
                 <th className="px-4 py-3 font-medium">% Propiedad</th>
                 <th className="px-4 py-3 font-medium">Aportado</th>
               </tr>
@@ -106,6 +118,12 @@ export default async function InversionistaPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-mono text-ink">
+                    {Number(f.cantidad_participaciones ?? 0).toFixed(2)}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-muted">
+                    ${Number(f.precio_entrada_usd ?? 0).toFixed(2)} c/u
+                  </td>
+                  <td className="px-4 py-3 font-mono text-ink">
                     {(Number(f.porcentaje_propiedad) * 100).toFixed(2)}%
                   </td>
                   <td className="px-4 py-3 font-mono text-ink">
@@ -115,8 +133,8 @@ export default async function InversionistaPage() {
               ))}
               {fraccionesNormalizadas.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted">
-                    Todavía no tienes fracciones activas.
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
+                    Todavía no tienes participaciones activas.
                   </td>
                 </tr>
               )}
