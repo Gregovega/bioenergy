@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Zap, Loader2 } from 'lucide-react'
 
@@ -78,8 +79,16 @@ export default function LoginPage() {
             {cargando && <Loader2 className="h-4 w-4 animate-spin" />}
             Iniciar sesión
           </button>
+
+          <Link
+            href="/login/olvide-password"
+            className="block text-center text-sm text-muted transition hover:text-accent"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
         </form>
       </div>
     </div>
   )
 }
+
