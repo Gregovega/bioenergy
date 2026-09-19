@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
+import { InversionistaNavTabs } from '@/components/inversionista/nav-tabs'
 import { Zap } from 'lucide-react'
 
 export default async function InversionistaLayout({
@@ -31,6 +32,9 @@ export default async function InversionistaLayout({
           </span>
           <span className="ml-4 text-sm text-muted">{inversionista.nombre}</span>
           <SignOutButton />
+        </div>
+        <div className="mx-auto max-w-5xl px-6">
+          <InversionistaNavTabs />
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
