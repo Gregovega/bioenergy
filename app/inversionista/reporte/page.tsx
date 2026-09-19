@@ -43,7 +43,7 @@ export default async function ReporteInversionistaPage() {
   const fase = inversionista?.fase_inversion as { nombre: string } | { nombre: string }[] | null
   const nombreFase = Array.isArray(fase) ? fase[0]?.nombre ?? null : fase?.nombre ?? null
 
-  const [{ data: movimientos }, { data: fracciones }, { data: reporteFiscal }, { data: insignias }] =
+  const [{ data: movimientos }, { data: fracciones }, { data: reporteFiscal }, { data: insignias }, { data: miRed }] =
     await Promise.all([
       supabase
         .from('billetera_movimiento')
@@ -63,6 +63,7 @@ export default async function ReporteInversionistaPage() {
         .select('fecha_otorgada, insignia(codigo, nombre, descripcion, icono)')
         .eq('inversionista_id', inversionista?.id ?? '')
         .order('fecha_otorgada', { ascending: false }),
+      supabase.rpc('fn_mi_red_referidos'),
     ])
 
   // --- Impacto ambiental atribuible (participación proporcional por equipo) ---
@@ -122,6 +123,19 @@ export default async function ReporteInversionistaPage() {
   const totalGanadoReferidos = (movimientos ?? [])
     .filter((m) => m.tipo === 'credito_referido')
     .reduce((acc, m) => acc + Number(m.monto_usd), 0)
+
+  type PersonaRed = { inversionista_id: string; nombre: string; fecha_registro: string; ganado_por_mi_usd: number }
+  const redPorNivel: Record<number, PersonaRed[]> = { 1: [], 2: [], 3: [] }
+  for (const p of (miRed ?? []) as any[]) {
+    const nivel = Number(p.nivel)
+    if (redPorNivel[nivel]) redPorNivel[nivel].push(p)
+  }
+  const totalPersonasRed = redPorNivel[1].length + redPorNivel[2].length + redPorNivel[3].length
+  const NOMBRE_NIVEL: Record<number, string> = {
+    1: 'Nivel 1 · directos (5%)',
+    2: 'Nivel 2 (3%)',
+    3: 'Nivel 3 (2%)',
+  }
 
   return (
     <div className="space-y-10">
@@ -255,51 +269,86 @@ export default async function ReporteInversionistaPage() {
         </div>
       </section>
 
-      {/* Referidos e insignias */}
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-line bg-surface p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Gift className="h-4 w-4 text-accent" strokeWidth={2} />
-            <h3 className="font-display text-base text-ink">Programa de referidos</h3>
-          </div>
-          <p className="mb-1 text-xs text-muted">Tu código</p>
-          <p className="mb-4 font-mono text-lg tracking-widest text-accent">
-            {inversionista?.codigo_referido ?? '—'}
-          </p>
-          <p className="mb-1 text-xs text-muted">Ganado por referidos hasta hoy</p>
-          <p className="font-mono text-lg text-ink">{formatoUsd(totalGanadoReferidos)}</p>
+      {/* Programa de referidos: árbol de 3 niveles */}
+      <section className="rounded-lg border border-line bg-surface p-6">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Gift className="h-4 w-4 text-accent" strokeWidth={2} />
+          <h3 className="font-display text-base text-ink">Mi red de referidos</h3>
+          <span className="ml-auto rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
+            Tu código: {inversionista?.codigo_referido ?? '—'}
+          </span>
         </div>
 
-        <div className="rounded-lg border border-line bg-surface p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Award className="h-4 w-4 text-accent" strokeWidth={2} />
-            <h3 className="font-display text-base text-ink">Insignias</h3>
-            {nombreFase && (
-              <span className="ml-auto rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
-                {nombreFase}
-              </span>
-            )}
+        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-xs text-muted">Personas en tu red</p>
+            <p className="font-mono text-xl text-ink">{totalPersonasRed}</p>
           </div>
-          <ul className="space-y-3">
-            {(insignias ?? []).map((i: any, idx: number) => {
-              const ins = Array.isArray(i.insignia) ? i.insignia[0] : i.insignia
-              return (
-                <li key={idx} className="flex items-center justify-between text-sm">
-                  <div>
-                    <p className="text-ink">{ins?.nombre ?? '—'}</p>
-                    {ins?.descripcion && <p className="text-xs text-muted">{ins.descripcion}</p>}
-                  </div>
-                  <span className="text-xs text-muted">
-                    {new Date(i.fecha_otorgada).toLocaleDateString('es-VE')}
-                  </span>
-                </li>
-              )
-            })}
-            {(insignias ?? []).length === 0 && (
-              <li className="text-sm text-muted">Aún no tienes insignias otorgadas.</li>
-            )}
-          </ul>
+          <div>
+            <p className="text-xs text-muted">Ganado por referidos hasta hoy</p>
+            <p className="font-mono text-xl text-ink">{formatoUsd(totalGanadoReferidos)}</p>
+          </div>
         </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((nivel) => (
+            <div key={nivel} className="rounded-lg border border-line p-4">
+              <h4 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted">
+                {NOMBRE_NIVEL[nivel]}
+              </h4>
+              <ul className="space-y-2">
+                {redPorNivel[nivel].map((p) => (
+                  <li key={p.inversionista_id} className="flex items-center justify-between text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-ink">{p.nombre}</span>
+                      <span className="text-[11px] text-muted">
+                        {new Date(p.fecha_registro).toLocaleDateString('es-VE')}
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs text-signal">
+                      +{formatoUsd(p.ganado_por_mi_usd)}
+                    </span>
+                  </li>
+                ))}
+                {redPorNivel[nivel].length === 0 && (
+                  <li className="text-sm text-muted">Todavía nadie en este nivel.</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Insignias */}
+      <section className="rounded-lg border border-line bg-surface p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Award className="h-4 w-4 text-accent" strokeWidth={2} />
+          <h3 className="font-display text-base text-ink">Insignias</h3>
+          {nombreFase && (
+            <span className="ml-auto rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
+              {nombreFase}
+            </span>
+          )}
+        </div>
+        <ul className="space-y-3">
+          {(insignias ?? []).map((i: any, idx: number) => {
+            const ins = Array.isArray(i.insignia) ? i.insignia[0] : i.insignia
+            return (
+              <li key={idx} className="flex items-center justify-between text-sm">
+                <div>
+                  <p className="text-ink">{ins?.nombre ?? '—'}</p>
+                  {ins?.descripcion && <p className="text-xs text-muted">{ins.descripcion}</p>}
+                </div>
+                <span className="text-xs text-muted">
+                  {new Date(i.fecha_otorgada).toLocaleDateString('es-VE')}
+                </span>
+              </li>
+            )
+          })}
+          {(insignias ?? []).length === 0 && (
+            <li className="text-sm text-muted">Aún no tienes insignias otorgadas.</li>
+          )}
+        </ul>
       </section>
     </div>
   )
