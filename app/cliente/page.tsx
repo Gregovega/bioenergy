@@ -83,51 +83,55 @@ export default async function ClientePage() {
         </div>
       )}
 
-      {asignacionesNormalizadas.map((asig) => {
-        const saldo = saldoPorAsignacion.get(asig.id) as any
-        return (
-          <section key={asig.id} className="space-y-4 rounded-lg border border-line p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-accent" />
-                <span className="font-mono text-sm text-ink">
-                  {asig.equipo?.numero_serie ?? '—'}
-                </span>
-                <span className="text-xs text-muted">{asig.equipo?.modelo}</span>
-              </div>
-              <span className="font-mono text-xs text-muted">
-                ${Number(asig.mensualidad_usd).toFixed(2)}/mes
-              </span>
-            </div>
-
-            {saldo && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-lg border border-line bg-surface p-5">
-                  <p className="font-mono text-2xl text-ink">
-                    ${Number(saldo.monto_devengado_ciclo_usd).toFixed(2)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">Devengado este ciclo</p>
+      {asignacionesNormalizadas.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {asignacionesNormalizadas.map((asig) => {
+            const saldo = saldoPorAsignacion.get(asig.id) as any
+            return (
+              <section key={asig.id} className="space-y-4 rounded-lg border border-line p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-accent" />
+                    <span className="font-mono text-sm text-ink">
+                      {asig.equipo?.numero_serie ?? '—'}
+                    </span>
+                    <span className="text-xs text-muted">{asig.equipo?.modelo}</span>
+                  </div>
+                  <span className="font-mono text-xs text-muted">
+                    ${Number(asig.mensualidad_usd).toFixed(2)}/mes
+                  </span>
                 </div>
-                <div className="rounded-lg border border-line bg-surface p-5">
-                  <p className="font-mono text-2xl text-ink">
-                    ${Number(saldo.saldo_pendiente_usd).toFixed(2)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">Saldo pendiente</p>
-                </div>
-              </div>
-            )}
 
-            {cliente && (
-              <FormularioReportarPago
-                clienteId={cliente.id}
-                asignacionId={asig.id}
-                userId={user!.id}
-                mensualidadSugerida={Number(asig.mensualidad_usd)}
-              />
-            )}
-          </section>
-        )
-      })}
+                {saldo && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-lg border border-line bg-surface p-5">
+                      <p className="font-mono text-2xl text-ink">
+                        ${Number(saldo.monto_devengado_ciclo_usd).toFixed(2)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">Devengado este ciclo</p>
+                    </div>
+                    <div className="rounded-lg border border-line bg-surface p-5">
+                      <p className="font-mono text-2xl text-ink">
+                        ${Number(saldo.saldo_pendiente_usd).toFixed(2)}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">Saldo pendiente</p>
+                    </div>
+                  </div>
+                )}
+
+                {cliente && (
+                  <FormularioReportarPago
+                    clienteId={cliente.id}
+                    asignacionId={asig.id}
+                    userId={user!.id}
+                    mensualidadSugerida={Number(asig.mensualidad_usd)}
+                  />
+                )}
+              </section>
+            )
+          })}
+        </div>
+      )}
 
       <section>
         <div className="mb-4 flex items-center gap-2">
