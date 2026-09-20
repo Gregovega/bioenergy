@@ -9,6 +9,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CalculadoraInversion } from '@/components/landing/calculadora-inversion'
+import { FormularioLead } from '@/components/landing/formulario-lead'
 import {
   Zap,
   Sun,
@@ -291,13 +292,11 @@ export default async function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="mailto:contacto@bioenergy.demo?subject=Quiero%20aportar%20mi%20equipo"
-                className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-signal hover:opacity-80"
-              >
-                Hablar con nosotros sobre tu equipo
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
+              <FormularioLead
+                origen="landing_equipo_tercero"
+                textoBoton="Hablar con nosotros sobre tu equipo"
+                className="mt-6 w-fit"
+              />
             </div>
 
             {/* Cliente final */}
@@ -417,13 +416,7 @@ export default async function LandingPage() {
             — poco o mucho, dinero o equipos — hay un lugar para ti en esto.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/login"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-base transition-opacity hover:opacity-90 sm:w-auto"
-            >
-              Empezar ahora
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <FormularioLead origen="landing_cta_final" textoBoton="Empezar ahora" className="w-full sm:w-auto" />
           </div>
         </div>
       </section>
