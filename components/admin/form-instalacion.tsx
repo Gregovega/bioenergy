@@ -29,19 +29,21 @@ export function FormInstalacion() {
   const [equipoId, setEquipoId] = useState('')
   const [clienteId, setClienteId] = useState('')
   const [tecnicoId, setTecnicoId] = useState('')
+  const [tipo, setTipo] = useState('instalacion')
+  const [prioridad, setPrioridad] = useState('media')
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10))
 
   useEffect(() => {
     async function cargar() {
-      const [{ data: eq }, { data: cli }, { data: staffRows }] = await Promise.all([
+      const [{ data: eq }, { data: cli }, { data: tecnicoRows }] = await Promise.all([
         supabase.from('equipo').select('id, numero_serie, modelo').order('numero_serie'),
         supabase.from('cliente_final').select('id, nombre').order('nombre'),
-        supabase.from('staff').select('user_id, rol, nombre').eq('rol', 'tecnico'),
+        supabase.from('tecnico').select('id, nombre').eq('activo', true).order('nombre'),
       ])
 
       setEquipos((eq ?? []).map((e) => ({ id: e.id, label: `${e.numero_serie} · ${e.modelo}` })))
       setClientes((cli ?? []).map((c) => ({ id: c.id, label: c.nombre })))
-      setTecnicos((staffRows ?? []).map((s) => ({ id: s.user_id, label: s.nombre || `Técnico ${s.user_id.slice(0, 8)}` })))
+      setTecnicos((tecnicoRows ?? []).map((t) => ({ id: t.id, label: t.nombre })))
       setCargando(false)
     }
     cargar()
@@ -56,10 +58,12 @@ export function FormInstalacion() {
     setGuardando(true)
     setError(null)
 
-    const { error: err } = await supabase.from('instalacion').insert({
+    const { error: err } = await supabase.from('orden_trabajo').insert({
       equipo_id: equipoId,
       cliente_id: clienteId || null,
       tecnico_id: tecnicoId,
+      tipo,
+      prioridad,
       fecha_programada: fecha || null,
       estado: 'pendiente',
     })
@@ -83,7 +87,7 @@ export function FormInstalacion() {
     return (
       <p className="text-sm text-muted">
         Todavía no hay ningún técnico dado de alta. Crea un usuario y agrégalo a la tabla{' '}
-        <code className="rounded bg-surface px-1">staff</code> con <code className="rounded bg-surface px-1">rol = 'tecnico'</code>.
+        <code className="rounded bg-surface px-1">tecnico</code> con su <code className="rounded bg-surface px-1">user_id</code>.
       </p>
     )
   }
@@ -138,6 +142,37 @@ export function FormInstalacion() {
         </select>
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted">Tipo</label>
+          <select
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value)}
+            className="w-full rounded-md border border-line bg-base px-3 py-2 text-sm text-ink capitalize"
+          >
+            {['instalacion', 'mantenimiento', 'desinstalacion', 'reparacion'].map((t) => (
+              <option key={t} value={t} className="capitalize">
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-muted">Prioridad</label>
+          <select
+            value={prioridad}
+            onChange={(e) => setPrioridad(e.target.value)}
+            className="w-full rounded-md border border-line bg-base px-3 py-2 text-sm text-ink capitalize"
+          >
+            {['baja', 'media', 'alta', 'urgente'].map((p) => (
+              <option key={p} value={p} className="capitalize">
+                {p}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div>
         <label className="mb-1 block text-xs font-medium text-muted">Fecha programada</label>
         <input
@@ -149,14 +184,14 @@ export function FormInstalacion() {
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
-      {exito && <p className="text-sm text-signal">Instalación asignada.</p>}
+      {exito && <p className="text-sm text-signal">Orden asignada.</p>}
 
       <button
         type="submit"
         disabled={guardando}
         className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-base disabled:opacity-50"
       >
-        {guardando ? 'Guardando...' : 'Asignar instalación'}
+        {guardando ? 'Guardando...' : 'Asignar orden'}
       </button>
     </form>
   )
