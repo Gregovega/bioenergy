@@ -14,7 +14,7 @@ export default async function ClientePage() {
 
   // Un cliente puede tener más de un equipo activo (segunda ubicación,
   // batería adicional, etc.), así que se trae como lista, no como fila única.
-  const [{ data: asignaciones }, { data: saldos }, { data: pagos }] = await Promise.all([
+  const [{ data: asignaciones }, { data: saldos }, { data: pagos }, { data: formasPago }] = await Promise.all([
     supabase
       .from('asignacion')
       .select('id, mensualidad_usd, equipo(numero_serie, modelo, estado)')
@@ -30,6 +30,11 @@ export default async function ClientePage() {
       .select('id, monto_usd, periodo, estado, created_at, asignacion(equipo(numero_serie))')
       .order('created_at', { ascending: false })
       .limit(10),
+    supabase
+      .from('forma_pago')
+      .select('*')
+      .eq('activo', true)
+      .order('orden', { ascending: true }),
   ])
 
   const asignacionesNormalizadas = (asignaciones ?? []).map((a: any) => ({
@@ -76,6 +81,36 @@ export default async function ClientePage() {
           </span>
         </div>
       </div>
+
+      {formasPago && formasPago.length > 0 && (
+        <section className="rounded-lg border border-line bg-surface p-5">
+          <h2 className="mb-3 font-display text-base text-ink">Cómo pagar</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {formasPago.map((fp: any) => (
+              <div key={fp.id} className="rounded-md border border-line p-3 text-sm">
+                <p className="font-medium text-ink">{fp.nombre}</p>
+                <div className="mt-1 space-y-0.5 text-xs text-muted">
+                  {fp.titular && <p>Titular: {fp.titular}</p>}
+                  {fp.identificador && <p>RIF/CI: {fp.identificador}</p>}
+                  {fp.detalle_1 && (
+                    <p>
+                      {fp.detalle_1_etiqueta ?? 'Dato'}:{' '}
+                      <span className="font-mono text-ink">{fp.detalle_1}</span>
+                    </p>
+                  )}
+                  {fp.detalle_2 && (
+                    <p>
+                      {fp.detalle_2_etiqueta ?? 'Dato'}:{' '}
+                      <span className="font-mono text-ink">{fp.detalle_2}</span>
+                    </p>
+                  )}
+                  {fp.notas && <p className="italic">{fp.notas}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {asignacionesNormalizadas.length === 0 && (
         <div className="rounded-lg border border-line bg-surface p-6 text-center text-sm text-muted">
