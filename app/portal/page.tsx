@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { SignOutButton } from '@/components/sign-out-button'
 
 export default async function PortalPage() {
   const supabase = await createClient()
@@ -9,6 +10,9 @@ export default async function PortalPage() {
 
   const { data: esStaff } = await supabase.rpc('is_staff')
   if (esStaff) redirect('/admin')
+
+  const { data: esTecnico } = await supabase.rpc('is_tecnico')
+  if (esTecnico) redirect('/tecnico')
 
   const { data: inversionista } = await supabase
     .from('inversionista')
@@ -26,13 +30,16 @@ export default async function PortalPage() {
 
   // Usuario autenticado pero sin rol asignado todavía en ninguna tabla.
   return (
-    <div className="flex min-h-screen items-center justify-center px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <div>
         <h1 className="font-display text-xl text-ink">Cuenta sin acceso asignado</h1>
         <p className="mt-2 text-sm text-muted">
           Tu usuario existe pero todavía no está vinculado a un perfil de inversionista,
-          cliente o staff. Contacta al administrador para que te asigne uno.
+          cliente, técnico o staff. Contacta al administrador para que te asigne uno.
         </p>
+      </div>
+      <div className="mt-6">
+        <SignOutButton />
       </div>
     </div>
   )
