@@ -16,6 +16,8 @@ import { Camera, Check, Loader2, MapPin } from 'lucide-react'
 
 type Instalacion = {
   id: string
+  tipo: string
+  prioridad: string
   estado: string
   fecha_programada: string | null
   fecha_completada: string | null
@@ -55,7 +57,7 @@ export function TarjetaInstalacion({ instalacion, userId }: { instalacion: Insta
     }
 
     const { error: errorUpdate } = await supabase
-      .from('instalacion')
+      .from('orden_trabajo')
       .update({
         estado: 'completada',
         fecha_completada: new Date().toISOString(),
@@ -80,7 +82,10 @@ export function TarjetaInstalacion({ instalacion, userId }: { instalacion: Insta
       <div className="flex items-center justify-between">
         <div>
           <p className="font-mono text-sm text-ink">{instalacion.equipo?.numero_serie ?? '—'}</p>
-          <p className="text-xs text-muted">{instalacion.equipo?.modelo}</p>
+          <p className="text-xs text-muted">
+            {instalacion.equipo?.modelo} · <span className="capitalize">{instalacion.tipo}</span> ·{' '}
+            <span className="capitalize">{instalacion.prioridad}</span>
+          </p>
         </div>
         <span
           className={`rounded-full border px-2 py-0.5 text-[11px] capitalize ${
