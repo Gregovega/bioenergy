@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Leaf, Zap as ZapIcon, Gift, Award, Download } from 'lucide-react'
+import { ArbolReferidos } from '@/components/inversionista/arbol-referidos'
 
 // =============================================================
 // PÁGINA: Reporte anual del inversionista ("dashboard estilo Excel")
@@ -124,18 +125,15 @@ export default async function ReporteInversionistaPage() {
     .filter((m) => m.tipo === 'credito_referido')
     .reduce((acc, m) => acc + Number(m.monto_usd), 0)
 
-  type PersonaRed = { inversionista_id: string; nombre: string; fecha_registro: string; ganado_por_mi_usd: number }
-  const redPorNivel: Record<number, PersonaRed[]> = { 1: [], 2: [], 3: [] }
-  for (const p of (miRed ?? []) as any[]) {
-    const nivel = Number(p.nivel)
-    if (redPorNivel[nivel]) redPorNivel[nivel].push(p)
-  }
-  const totalPersonasRed = redPorNivel[1].length + redPorNivel[2].length + redPorNivel[3].length
-  const NOMBRE_NIVEL: Record<number, string> = {
-    1: 'Nivel 1 · directos (5%)',
-    2: 'Nivel 2 (3%)',
-    3: 'Nivel 3 (2%)',
-  }
+  const redNormalizada = ((miRed ?? []) as any[]).map((p) => ({
+    nivel: Number(p.nivel),
+    inversionista_id: p.inversionista_id as string,
+    referido_por_id: (p.referido_por_id as string | null) ?? null,
+    nombre: p.nombre as string,
+    fecha_registro: p.fecha_registro as string,
+    ganado_por_mi_usd: Number(p.ganado_por_mi_usd ?? 0),
+  }))
+  const totalPersonasRed = redNormalizada.length
 
   return (
     <div className="space-y-10">
@@ -290,32 +288,8 @@ export default async function ReporteInversionistaPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((nivel) => (
-            <div key={nivel} className="rounded-lg border border-line p-4">
-              <h4 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted">
-                {NOMBRE_NIVEL[nivel]}
-              </h4>
-              <ul className="space-y-2">
-                {redPorNivel[nivel].map((p) => (
-                  <li key={p.inversionista_id} className="flex items-center justify-between text-sm">
-                    <div className="flex flex-col">
-                      <span className="text-ink">{p.nombre}</span>
-                      <span className="text-[11px] text-muted">
-                        {new Date(p.fecha_registro).toLocaleDateString('es-VE')}
-                      </span>
-                    </div>
-                    <span className="font-mono text-xs text-signal">
-                      +{formatoUsd(p.ganado_por_mi_usd)}
-                    </span>
-                  </li>
-                ))}
-                {redPorNivel[nivel].length === 0 && (
-                  <li className="text-sm text-muted">Todavía nadie en este nivel.</li>
-                )}
-              </ul>
-            </div>
-          ))}
+        <div className="rounded-lg border border-line p-4">
+          <ArbolReferidos red={redNormalizada} />
         </div>
       </section>
 
