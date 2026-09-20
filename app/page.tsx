@@ -7,6 +7,8 @@
 // =============================================================
 
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { CalculadoraInversion } from '@/components/landing/calculadora-inversion'
 import {
   Zap,
   Sun,
@@ -28,7 +30,38 @@ export const metadata = {
     'Invierte desde montos pequeños en equipos de energía solar que generan ingresos reales, o aporta tu propio equipo para que nosotros lo gestionemos.',
 }
 
-export default function LandingPage() {
+// Respaldo si todavía no hay ninguna fase de inversión cargada en la BD.
+const TRAMO_RESPALDO = { precio1: 30, precio2: 25, precio3: 20, umbral1: 900, umbral2: 2000 }
+
+export default async function LandingPage() {
+  const supabase = await createClient()
+
+  const [{ data: fase }, { data: config }] = await Promise.all([
+    supabase
+      .from('fase_inversion')
+      .select('precio_tramo1_usd, precio_tramo2_usd, precio_tramo3_usd, umbral_tramo1_usd, umbral_tramo2_usd')
+      .eq('estado', 'abierta')
+      .order('orden', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('configuracion_global')
+      .select('valor')
+      .eq('clave', 'referido_inversion_minima_usd')
+      .maybeSingle(),
+  ])
+
+  const tramo = fase
+    ? {
+        precio1: Number(fase.precio_tramo1_usd),
+        precio2: Number(fase.precio_tramo2_usd),
+        precio3: Number(fase.precio_tramo3_usd),
+        umbral1: Number(fase.umbral_tramo1_usd),
+        umbral2: Number(fase.umbral_tramo2_usd),
+      }
+    : TRAMO_RESPALDO
+  const minimoReferido = Number(config?.valor ?? 0)
+
   return (
     <div className="min-h-screen bg-base">
       {/* ---------------- NAV ---------------- */}
@@ -258,6 +291,13 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
+              <a
+                href="mailto:contacto@bioenergy.demo?subject=Quiero%20aportar%20mi%20equipo"
+                className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-signal hover:opacity-80"
+              >
+                Hablar con nosotros sobre tu equipo
+                <ArrowRight className="h-3.5 w-3.5" />
+              </a>
             </div>
 
             {/* Cliente final */}
@@ -292,6 +332,10 @@ export default function LandingPage() {
             dinero o en equipo, todas las participaciones valen lo mismo a la hora de repartir. Lo
             que cambia es el precio al que entraste, no lo que cobras después.
           </p>
+
+          <div className="mt-14">
+            <CalculadoraInversion tramo={tramo} minimoReferido={minimoReferido} />
+          </div>
         </div>
       </section>
 
