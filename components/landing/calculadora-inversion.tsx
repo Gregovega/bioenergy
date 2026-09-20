@@ -13,8 +13,8 @@
 // =============================================================
 
 import { useMemo, useState } from 'react'
-import Link from 'next/link'
-import { ArrowRight, Calculator } from 'lucide-react'
+import { Calculator } from 'lucide-react'
+import { FormularioLead } from './formulario-lead'
 
 const MONTOS_RAPIDOS = [500, 1000, 2000, 5000]
 
@@ -115,16 +115,14 @@ export function CalculadoraInversion({
             )}
           </div>
 
-          <Link
-            href="/login"
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-base transition-opacity hover:opacity-90"
-          >
-            Quiero invertir esto
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <FormularioLead
+            origen="landing_calculadora"
+            montoSugerido={monto}
+            textoBoton="Quiero invertir esto"
+            className="mt-6"
+          />
         </div>
       </div>
     </div>
   )
 }
-
