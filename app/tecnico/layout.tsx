@@ -22,13 +22,13 @@ export default async function TecnicoLayout({
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: staffRow } = await supabase
-    .from('staff')
-    .select('rol')
+  const { data: tecnicoRow } = await supabase
+    .from('tecnico')
+    .select('id, activo')
     .eq('user_id', user.id)
     .maybeSingle()
 
-  if (!staffRow || staffRow.rol !== 'tecnico') redirect('/')
+  if (!tecnicoRow || !tecnicoRow.activo) redirect('/')
 
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
