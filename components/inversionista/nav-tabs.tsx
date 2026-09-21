@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 const TABS = [
   { href: '/inversionista', label: 'Resumen' },
   { href: '/inversionista/reporte', label: 'Reporte anual' },
+  { href: '/inversionista/informe', label: 'Informe fiscal' },
 ]
 
 export function InversionistaNavTabs() {
@@ -32,3 +33,5 @@ export function InversionistaNavTabs() {
     </nav>
   )
 }
+
+
