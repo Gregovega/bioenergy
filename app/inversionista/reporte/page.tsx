@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Leaf, Zap as ZapIcon, Gift, Award, Download } from 'lucide-react'
 import { ArbolReferidos } from '@/components/inversionista/arbol-referidos'
+import { EnlaceReferido } from '@/components/inversionista/enlace-referido'
 
 // =============================================================
 // PÁGINA: Reporte anual del inversionista ("dashboard estilo Excel")
@@ -272,9 +273,11 @@ export default async function ReporteInversionistaPage() {
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <Gift className="h-4 w-4 text-accent" strokeWidth={2} />
           <h3 className="font-display text-base text-ink">Mi red de referidos</h3>
-          <span className="ml-auto rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">
-            Tu código: {inversionista?.codigo_referido ?? '—'}
-          </span>
+        </div>
+
+        <div className="mb-6">
+          <p className="mb-2 text-xs text-muted">Tu enlace de referido</p>
+          <EnlaceReferido codigo={inversionista?.codigo_referido} />
         </div>
 
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
