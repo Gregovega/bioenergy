@@ -24,6 +24,7 @@ export default async function InversionistaLayout({
 
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
+      <OnboardingGate rol="inversionista" />
       <header className="border-b border-line bg-surface/60 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
           <Zap className="h-5 w-5 text-accent" strokeWidth={2.5} />
