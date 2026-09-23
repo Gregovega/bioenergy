@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CalculadoraInversion } from '@/components/landing/calculadora-inversion'
 import { FormularioLead } from '@/components/landing/formulario-lead'
+import { ImpactoAmbiental } from '@/components/landing/impacto-ambiental'
 import {
   Zap,
   Sun,
@@ -337,8 +338,9 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+      
 
-      {/* ---------------- TRANSPARENCIA ---------------- */}
+            {/* ---------------- TRANSPARENCIA ---------------- */}
       <section id="transparencia" className="border-t border-line bg-surface/30">
         <div className="mx-auto max-w-6xl px-6 py-24">
           <div className="grid gap-14 lg:grid-cols-2">
@@ -402,6 +404,12 @@ export default async function LandingPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="impacto" className="border-t border-line">
+        <div className="mx-auto max-w-4xl px-6 py-24">
+          <ImpactoAmbiental />
         </div>
       </section>
 
