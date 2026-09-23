@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
 import { Zap } from 'lucide-react'
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
+import { CampanaNotificaciones } from '@/components/notificaciones/campana-notificaciones'
 
 export default async function ClienteLayout({
   children,
@@ -30,6 +31,7 @@ export default async function ClienteLayout({
           <Zap className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg tracking-tight">Mi Servicio</span>
           <span className="ml-4 text-sm text-muted">{cliente.nombre}</span>
+          <CampanaNotificaciones />
           <SignOutButton />
         </div>
       </header>
