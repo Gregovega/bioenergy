@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
+import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
 import { Wrench } from 'lucide-react'
 
 // =============================================================
