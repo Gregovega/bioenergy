@@ -15,7 +15,7 @@ export default async function ClientePage() {
 
   // Un cliente puede tener más de un equipo activo (segunda ubicación,
   // batería adicional, etc.), así que se trae como lista, no como fila única.
-   const [{ data: asignaciones }, { data: saldos }, { data: pagos }, { data: formasPago }, { data: fidelidadSaldo }, { data: fidelidadCatalogo }, { data: fidelidadMovimientos }] = await Promise.all([
+  const [{ data: asignaciones }, { data: saldos }, { data: pagos }, { data: formasPago }, { data: fidelidadSaldo }, { data: fidelidadCatalogo }, { data: fidelidadMovimientos }] = await Promise.all([
     supabase
       .from('asignacion')
       .select('id, mensualidad_usd, equipo(numero_serie, modelo, estado)')
@@ -52,7 +52,7 @@ export default async function ClientePage() {
       .eq('cliente_id', cliente?.id ?? '')
       .order('created_at', { ascending: false })
       .limit(10),
-  ]) 
+  ])
 
   const asignacionesNormalizadas = (asignaciones ?? []).map((a: any) => ({
     ...a,
@@ -184,6 +184,13 @@ export default async function ClientePage() {
           })}
         </div>
       )}
+
+      <FidelidadWidget
+        puntosDisponibles={fidelidadSaldo?.puntos_disponibles ?? 0}
+        racha={cliente?.racha_pagos_puntual ?? 0}
+        catalogo={fidelidadCatalogo ?? []}
+        movimientos={fidelidadMovimientos ?? []}
+      />
 
       <section>
         <div className="mb-4 flex items-center gap-2">
