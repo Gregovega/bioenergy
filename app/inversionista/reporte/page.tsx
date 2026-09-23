@@ -45,17 +45,16 @@ export default async function ReporteInversionistaPage() {
   const fase = inversionista?.fase_inversion as { nombre: string } | { nombre: string }[] | null
   const nombreFase = Array.isArray(fase) ? fase[0]?.nombre ?? null : fase?.nombre ?? null
 
-  const [{ data: movimientos }, { data: fracciones }, { data: reporteFiscal }, { data: insignias }, { data: miRed }] =
+  const [{ data: movimientos }, { data: impactoAmbiental }, { data: reporteFiscal }, { data: insignias }, { data: miRed }] =
     await Promise.all([
       supabase
         .from('billetera_movimiento')
         .select('id, monto_usd, tipo, fecha')
         .order('fecha', { ascending: true })
         .limit(1000),
-      supabase
-        .from('fraccion')
-        .select('porcentaje_propiedad, equipo(kwh_generados_total, co2_evitado_kg_total)')
-        .eq('estado', 'activa'),
+      // Estima por capacidad instalada + tiempo mientras no hay telemetría real;
+      // en cuanto un equipo reporte datos reales, los usa automático (sin tocar este archivo).
+      supabase.rpc('fn_impacto_ambiental_inversionista'),
       supabase
         .from('vista_reporte_fiscal_anual')
         .select('anio, tipo, total_usd')
@@ -68,19 +67,9 @@ export default async function ReporteInversionistaPage() {
       supabase.rpc('fn_mi_red_referidos'),
     ])
 
-  // --- Impacto ambiental atribuible (participación proporcional por equipo) ---
-  const fraccionesNormalizadas = (fracciones ?? []).map((f: any) => ({
-    porcentaje_propiedad: Number(f.porcentaje_propiedad ?? 0),
-    equipo: Array.isArray(f.equipo) ? f.equipo[0] ?? null : f.equipo ?? null,
-  }))
-  const kwhAtribuibles = fraccionesNormalizadas.reduce(
-    (acc, f) => acc + Number(f.equipo?.kwh_generados_total ?? 0) * f.porcentaje_propiedad,
-    0
-  )
-  const co2Atribuible = fraccionesNormalizadas.reduce(
-    (acc, f) => acc + Number(f.equipo?.co2_evitado_kg_total ?? 0) * f.porcentaje_propiedad,
-    0
-  )
+  // --- Impacto ambiental atribuible (estimado→real vía fn_impacto_ambiental_inversionista) ---
+  const kwhAtribuibles = Number((impactoAmbiental as any)?.kwh_atribuido ?? 0)
+  const co2Atribuible = Number((impactoAmbiental as any)?.co2_evitado_kg ?? 0)
 
   // --- Historial mensual (fila por mes, columna por tipo de movimiento) ---
   type FilaMensual = { clave: string; label: string; neto: number; montos: Record<string, number> }
