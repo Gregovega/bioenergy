@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
 import { Zap } from 'lucide-react'
+import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
 
 export default async function ClienteLayout({
   children,
@@ -21,8 +22,9 @@ export default async function ClienteLayout({
 
   if (!cliente) redirect('/')
 
-  return (
+    return (
     <div className="min-h-screen bg-base font-sans text-ink">
+      <OnboardingGate rol="cliente" />
       <header className="border-b border-line bg-surface/60 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-6 py-4">
           <Zap className="h-5 w-5 text-accent" strokeWidth={2.5} />
