@@ -13,8 +13,13 @@ export default async function AdminLayout({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: esStaff } = await supabase.rpc('is_staff')
-  if (!esStaff) redirect('/')
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('rol')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!staff) redirect('/')
 
   return (
     <div className="min-h-screen bg-base font-sans text-ink">
@@ -25,7 +30,7 @@ export default async function AdminLayout({
           <span className="ml-auto text-sm text-muted">{user.email}</span>
         </div>
         <div className="mx-auto max-w-7xl px-6 pb-3">
-          <AdminNav />
+          <AdminNav rol={staff.rol} />
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
