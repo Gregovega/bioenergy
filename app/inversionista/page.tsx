@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Wallet, TrendingUp, Clock, PieChart } from 'lucide-react'
 import BilleteraDesglose from '@/components/inversionista/BilleteraDesglose'
+import ToggleReinversion from '@/components/inversionista/toggle-reinversion'
 
 export default async function InversionistaPage() {
   const supabase = await createClient()
@@ -9,10 +10,10 @@ export default async function InversionistaPage() {
   // RLS ya restringe cada una de estas consultas a las filas de este inversionista.
   const [{ data: inversionista }, { data: fracciones }, { data: movimientos }, { data: devengado }] =
     await Promise.all([
-      supabase.from('inversionista').select('id, nombre, estado_kyc').eq('user_id', user!.id).single(),
+      supabase.from('inversionista').select('id, nombre, estado_kyc, reinversion_activa').eq('user_id', user!.id).single(),
       supabase
         .from('fraccion')
-        .select('id, monto_aportado_usd, porcentaje_propiedad, precio_entrada_usd, cantidad_participaciones, estado, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
+        .select('id, monto_aportado_usd, porcentaje_propiedad, precio_entrada_usd, cantidad_participaciones, estado, origen, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
         .eq('estado', 'activa'),
       supabase
         .from('billetera_movimiento')
@@ -81,6 +82,8 @@ export default async function InversionistaPage() {
         ))}
       </div>
 
+      <ToggleReinversion activaInicial={inversionista?.reinversion_activa ?? true} />
+
       {inversionista?.id && <BilleteraDesglose inversionistaId={inversionista.id} />}
 
       <section>
@@ -97,6 +100,7 @@ export default async function InversionistaPage() {
                 <th className="px-4 py-3 font-medium">Equipo</th>
                 <th className="px-4 py-3 font-medium">Capacidad</th>
                 <th className="px-4 py-3 font-medium">Estado</th>
+                <th className="px-4 py-3 font-medium">Origen</th>
                 <th className="px-4 py-3 font-medium">Participaciones</th>
                 <th className="px-4 py-3 font-medium">Precio pagado</th>
                 <th className="px-4 py-3 font-medium">% Propiedad</th>
@@ -117,6 +121,19 @@ export default async function InversionistaPage() {
                       {f.equipo?.estado}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    {f.origen === 'reinversion' ? (
+                      <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
+                        Reinversión
+                      </span>
+                    ) : f.origen === 'equipo_aportado' ? (
+                      <span className="rounded-full bg-line/40 px-2 py-0.5 text-xs font-medium text-muted">
+                        Aportado
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted">Compra</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-mono text-ink">
                     {Number(f.cantidad_participaciones ?? 0).toFixed(2)}
                   </td>
@@ -133,7 +150,7 @@ export default async function InversionistaPage() {
               ))}
               {fraccionesNormalizadas.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
                     Todavía no tienes participaciones activas.
                   </td>
                 </tr>
