@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { FormularioReportarPago } from '@/components/cliente/formulario-reportar-pago'
+import { FidelidadWidget } from '@/components/cliente/fidelidad-widget'
 import { Zap, Clock } from 'lucide-react'
 
 export default async function ClientePage() {
@@ -8,13 +9,13 @@ export default async function ClientePage() {
 
   const { data: cliente } = await supabase
     .from('cliente_final')
-    .select('id, estado_servicio')
+    .select('id, estado_servicio, racha_pagos_puntual')
     .eq('user_id', user!.id)
     .single()
 
   // Un cliente puede tener más de un equipo activo (segunda ubicación,
   // batería adicional, etc.), así que se trae como lista, no como fila única.
-  const [{ data: asignaciones }, { data: saldos }, { data: pagos }, { data: formasPago }] = await Promise.all([
+   const [{ data: asignaciones }, { data: saldos }, { data: pagos }, { data: formasPago }, { data: fidelidadSaldo }, { data: fidelidadCatalogo }, { data: fidelidadMovimientos }] = await Promise.all([
     supabase
       .from('asignacion')
       .select('id, mensualidad_usd, equipo(numero_serie, modelo, estado)')
@@ -35,7 +36,23 @@ export default async function ClientePage() {
       .select('*')
       .eq('activo', true)
       .order('orden', { ascending: true }),
-  ])
+    supabase
+      .from('vista_fidelidad_saldo')
+      .select('puntos_disponibles')
+      .eq('cliente_id', cliente?.id ?? '')
+      .maybeSingle(),
+    supabase
+      .from('fidelidad_recompensa')
+      .select('id, nombre, descripcion, costo_puntos')
+      .eq('activo', true)
+      .order('costo_puntos', { ascending: true }),
+    supabase
+      .from('fidelidad_puntos_movimiento')
+      .select('id, tipo, puntos, descripcion, created_at')
+      .eq('cliente_id', cliente?.id ?? '')
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ]) 
 
   const asignacionesNormalizadas = (asignaciones ?? []).map((a: any) => ({
     ...a,
