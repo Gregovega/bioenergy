@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
 import { InversionistaNavTabs } from '@/components/inversionista/nav-tabs'
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
+import { CampanaNotificaciones } from '@/components/notificaciones/campana-notificaciones'
 import { Zap } from 'lucide-react'
 
 export default async function InversionistaLayout({
@@ -33,6 +34,7 @@ export default async function InversionistaLayout({
             Portal del Inversionista
           </span>
           <span className="ml-4 text-sm text-muted">{inversionista.nombre}</span>
+          <CampanaNotificaciones />
           <SignOutButton />
         </div>
         <div className="mx-auto max-w-5xl px-6">
