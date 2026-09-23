@@ -2,33 +2,43 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet } from 'lucide-react'
+import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award } from 'lucide-react'
+
+export type RolStaff = 'super_admin' | 'admin' | 'crm' | 'atencion'
 
 // -------------------------------------------------------------
 // Para agregar una ruta nueva al menú del Mothership, solo hay
 // que agregar un objeto aquí. Cuando construyas /admin/pagos,
 // etc., van aquí.
+//
+// `roles`: qué roles de staff ven este link. Ajusta esta lista
+// a mano cuando cambien las reglas del negocio — no hay lógica
+// implícita, lo que ves aquí es exactamente quién lo ve.
 // -------------------------------------------------------------
-const ENLACES = [
-  { href: '/admin', label: 'Panel general', icon: LayoutDashboard, exact: true },
-  { href: '/admin/leads', label: 'Leads (CRM)', icon: Contact, exact: false },
-  { href: '/admin/fases', label: 'Fases de inversión', icon: Layers, exact: false },
-  { href: '/admin/categorias', label: 'Categorías de socio', icon: Users, exact: false },
-  { href: '/admin/pagos', label: 'Pagos y referidos', icon: Landmark, exact: false },
-  { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false },
-  { href: '/admin/instalaciones/nueva', label: 'Asignar instalación', icon: Wrench, exact: false },
-  { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false },
-  { href: '/admin/fracciones/nueva', label: 'Nueva participación', icon: Coins, exact: false },
-  { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false },
-  { href: '/admin/empresa', label: 'Caja y reservas', icon: Wallet, exact: false },
+const TODOS: RolStaff[] = ['super_admin', 'admin', 'crm', 'atencion']
+
+const ENLACES: { href: string; label: string; icon: any; exact: boolean; roles: RolStaff[] }[] = [
+  { href: '/admin', label: 'Panel general', icon: LayoutDashboard, exact: true, roles: TODOS },
+  { href: '/admin/leads', label: 'Leads (CRM)', icon: Contact, exact: false, roles: ['super_admin', 'admin', 'crm'] },
+  { href: '/admin/fases', label: 'Fases de inversión', icon: Layers, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/categorias', label: 'Categorías de socio', icon: Users, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/pagos', label: 'Pagos y referidos', icon: Landmark, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
+  { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
+  { href: '/admin/instalaciones/nueva', label: 'Asignar instalación', icon: Wrench, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
+  { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false, roles: ['super_admin', 'admin', 'crm', 'atencion'] },
+  { href: '/admin/fracciones/nueva', label: 'Nueva participación', icon: Coins, exact: false, roles: ['super_admin', 'admin', 'crm'] },
+  { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
+  { href: '/admin/empresa', label: 'Caja y reservas', icon: Wallet, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/fidelidad', label: 'Fidelidad', icon: Award, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
 ]
 
-export function AdminNav() {
+export function AdminNav({ rol }: { rol: RolStaff }) {
   const pathname = usePathname()
+  const visibles = ENLACES.filter(({ roles }) => roles.includes(rol))
 
   return (
     <nav className="flex items-center gap-1">
-      {ENLACES.map(({ href, label, icon: Icon, exact }) => {
+      {visibles.map(({ href, label, icon: Icon, exact }) => {
         const activo = exact ? pathname === href : pathname.startsWith(href)
         return (
           <Link
