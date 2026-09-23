@@ -28,6 +28,7 @@ const ENLACES: { href: string; label: string; icon: any; exact: boolean; roles: 
   { href: '/admin/fracciones/nueva', label: 'Nueva participación', icon: Coins, exact: false, roles: ['super_admin', 'admin', 'crm'] },
   { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/empresa', label: 'Caja y reservas', icon: Wallet, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/reinversion', label: 'Reinversión', icon: Repeat2, exact: false, roles: ['super_admin', 'admin'] },
   { href: '/admin/fidelidad', label: 'Fidelidad', icon: Award, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/salud-negocio', label: 'Salud del negocio', icon: Activity, exact: false, roles: ['super_admin', 'admin'] },
 ]
