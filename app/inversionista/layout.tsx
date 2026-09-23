@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
 import { InversionistaNavTabs } from '@/components/inversionista/nav-tabs'
+import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
 import { Zap } from 'lucide-react'
 
 export default async function InversionistaLayout({
