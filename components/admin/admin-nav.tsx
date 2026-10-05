@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2, Store } from 'lucide-react'
+import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2, Store, ListChecks } from 'lucide-react'
 export type RolStaff = 'super_admin' | 'admin' | 'crm' | 'atencion'
 
 // -------------------------------------------------------------
@@ -26,6 +26,7 @@ const ENLACES: { href: string; label: string; icon: any; exact: boolean; roles: 
   { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/instalaciones/nueva', label: 'Asignar instalación', icon: Wrench, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false, roles: ['super_admin', 'admin', 'crm', 'atencion'] },
+  { href: '/admin/fracciones', label: 'Plazos de participación', icon: ListChecks, exact: true, roles: ['super_admin', 'admin'] },
   { href: '/admin/fracciones/nueva', label: 'Nueva participación', icon: Coins, exact: false, roles: ['super_admin', 'admin', 'crm'] },
   { href: '/admin/asignaciones/nueva', label: 'Nueva asignación', icon: PlusCircle, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/empresa', label: 'Caja y reservas', icon: Wallet, exact: false, roles: ['super_admin', 'admin'] },
