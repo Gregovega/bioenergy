@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2 } from 'lucide-react'
+import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2, Store } from 'lucide-react'
 export type RolStaff = 'super_admin' | 'admin' | 'crm' | 'atencion'
 
 // -------------------------------------------------------------
@@ -22,6 +22,7 @@ const ENLACES: { href: string; label: string; icon: any; exact: boolean; roles: 
   { href: '/admin/fases', label: 'Fases de inversión', icon: Layers, exact: false, roles: ['super_admin', 'admin'] },
   { href: '/admin/categorias', label: 'Categorías de socio', icon: Users, exact: false, roles: ['super_admin', 'admin'] },
   { href: '/admin/pagos', label: 'Pagos y referidos', icon: Landmark, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
+  { href: '/admin/marketplace', label: 'Marketplace', icon: Store, exact: false, roles: ['super_admin', 'admin'] },
   { href: '/admin/equipos/nuevo', label: 'Nuevo equipo', icon: Cpu, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/instalaciones/nueva', label: 'Asignar instalación', icon: Wrench, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/clientes/nuevo', label: 'Nuevo cliente', icon: UserPlus, exact: false, roles: ['super_admin', 'admin', 'crm', 'atencion'] },
