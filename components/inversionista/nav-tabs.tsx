@@ -8,6 +8,7 @@ const TABS = [
   { href: '/inversionista/reporte', label: 'Reporte anual' },
   { href: '/inversionista/informe', label: 'Informe fiscal' },
   { href: '/inversionista/reinversion', label: 'Mi reinversión' },
+  { href: '/inversionista/marketplace', label: 'Marketplace' },
 ]
 
 export function InversionistaNavTabs() {
