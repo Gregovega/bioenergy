@@ -3,6 +3,12 @@ import { Wallet, TrendingUp, Clock, PieChart } from 'lucide-react'
 import BilleteraDesglose from '@/components/inversionista/BilleteraDesglose'
 import ToggleReinversion from '@/components/inversionista/toggle-reinversion'
 
+function sumarMeses(fechaISO: string, meses: number) {
+  const d = new Date(fechaISO)
+  d.setMonth(d.getMonth() + meses)
+  return d
+}
+
 export default async function InversionistaPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,7 +19,7 @@ export default async function InversionistaPage() {
       supabase.from('inversionista').select('id, nombre, estado_kyc, reinversion_activa').eq('user_id', user!.id).single(),
       supabase
         .from('fraccion')
-        .select('id, monto_aportado_usd, porcentaje_propiedad, precio_entrada_usd, cantidad_participaciones, estado, origen, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
+        .select('id, monto_aportado_usd, porcentaje_propiedad, precio_entrada_usd, cantidad_participaciones, estado, origen, fecha_compra, plazo_meses, equipo(numero_serie, modelo, estado, capacidad_inversor_kw, capacidad_bateria_kwh)')
         .eq('estado', 'activa'),
       supabase
         .from('billetera_movimiento')
@@ -61,6 +67,8 @@ export default async function InversionistaPage() {
     { label: 'En camino (por acreditar)', value: enCamino, icon: Clock },
   ]
 
+  const ahora = new Date()
+
   return (
     <div className="space-y-10">
       {inversionista?.estado_kyc !== 'verificado' && (
@@ -105,52 +113,74 @@ export default async function InversionistaPage() {
                 <th className="px-4 py-3 font-medium">Precio pagado</th>
                 <th className="px-4 py-3 font-medium">% Propiedad</th>
                 <th className="px-4 py-3 font-medium">Aportado</th>
+                <th className="px-4 py-3 font-medium">Dividendos hasta</th>
               </tr>
             </thead>
             <tbody>
-              {fraccionesNormalizadas.map((f) => (
-                <tr key={f.id} className="border-b border-line last:border-0">
-                  <td className="px-4 py-3 font-mono text-ink">
-                    {f.equipo?.numero_serie ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-muted">
-                    {f.equipo?.capacidad_inversor_kw}kW / {f.equipo?.capacidad_bateria_kwh}kWh
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-medium text-signal">
-                      {f.equipo?.estado}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {f.origen === 'reinversion' ? (
-                      <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
-                        Reinversión
+              {fraccionesNormalizadas.map((f) => {
+                const hasta =
+                  f.fecha_compra && f.plazo_meses
+                    ? sumarMeses(f.fecha_compra, Number(f.plazo_meses))
+                    : null
+                const cumplido = hasta ? hasta <= ahora : false
+                return (
+                  <tr key={f.id} className="border-b border-line last:border-0">
+                    <td className="px-4 py-3 font-mono text-ink">
+                      {f.equipo?.numero_serie ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-muted">
+                      {f.equipo?.capacidad_inversor_kw}kW / {f.equipo?.capacidad_bateria_kwh}kWh
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-medium text-signal">
+                        {f.equipo?.estado}
                       </span>
-                    ) : f.origen === 'equipo_aportado' ? (
-                      <span className="rounded-full bg-line/40 px-2 py-0.5 text-xs font-medium text-muted">
-                        Aportado
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted">Compra</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-ink">
-                    {Number(f.cantidad_participaciones ?? 0).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-muted">
-                    ${Number(f.precio_entrada_usd ?? 0).toFixed(2)} c/u
-                  </td>
-                  <td className="px-4 py-3 font-mono text-ink">
-                    {(Number(f.porcentaje_propiedad) * 100).toFixed(2)}%
-                  </td>
-                  <td className="px-4 py-3 font-mono text-ink">
-                    ${Number(f.monto_aportado_usd).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3">
+                      {f.origen === 'reinversion' ? (
+                        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
+                          Reinversión
+                        </span>
+                      ) : f.origen === 'equipo_aportado' ? (
+                        <span className="rounded-full bg-line/40 px-2 py-0.5 text-xs font-medium text-muted">
+                          Aportado
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted">Compra</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-ink">
+                      {Number(f.cantidad_participaciones ?? 0).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-muted">
+                      ${Number(f.precio_entrada_usd ?? 0).toFixed(2)} c/u
+                    </td>
+                    <td className="px-4 py-3 font-mono text-ink">
+                      {(Number(f.porcentaje_propiedad) * 100).toFixed(2)}%
+                    </td>
+                    <td className="px-4 py-3 font-mono text-ink">
+                      ${Number(f.monto_aportado_usd).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {hasta ? (
+                        <div>
+                          <span className="font-mono text-ink">
+                            {hasta.toLocaleDateString('es-VE')}
+                          </span>
+                          {cumplido && (
+                            <p className="text-[11px] text-muted">Plazo cumplido</p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted">—</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
               {fraccionesNormalizadas.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-muted">
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted">
                     Todavía no tienes participaciones activas.
                   </td>
                 </tr>
