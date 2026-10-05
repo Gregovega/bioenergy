@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SignOutButton } from '@/components/sign-out-button'
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
+import { CampanaNotificaciones } from '@/components/notificaciones/campana-notificaciones'
 import { Wrench } from 'lucide-react'
 
 // =============================================================
@@ -9,6 +10,8 @@ import { Wrench } from 'lucide-react'
 // Portal simple para el equipo de instalación. Requiere que el
 // usuario tenga una fila en `staff` con rol = 'tecnico' (se crea
 // a mano en Supabase por ahora, igual que el resto del staff).
+// Incluye la campana de notificaciones (las políticas RLS de
+// notificacion para destinatario_tipo = 'tecnico' ya están aplicadas).
 // =============================================================
 
 export default async function TecnicoLayout({
@@ -38,7 +41,8 @@ export default async function TecnicoLayout({
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-6 py-4">
           <Wrench className="h-5 w-5 text-accent" strokeWidth={2.5} />
           <span className="font-display text-lg tracking-tight">Instalaciones</span>
-          <span className="ml-auto">
+          <span className="ml-auto flex items-center gap-3">
+            <CampanaNotificaciones />
             <SignOutButton />
           </span>
         </div>
