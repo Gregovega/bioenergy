@@ -2,17 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2, Store, ListChecks } from 'lucide-react'
+import { LayoutDashboard, Users, PlusCircle, Cpu, UserPlus, Coins, Layers, Landmark, Contact, Wrench, Wallet, Award, Activity, Repeat2, Store, ListChecks, Settings, Bot, MessageSquare } from 'lucide-react'
 export type RolStaff = 'super_admin' | 'admin' | 'crm' | 'atencion'
 
 // -------------------------------------------------------------
-// Para agregar una ruta nueva al menú del Mothership, solo hay
-// que agregar un objeto aquí. Cuando construyas /admin/pagos,
-// etc., van aquí.
+// Para agregar una ruta nueva al menú del panel de administración,
+// solo hay que agregar un objeto aquí.
 //
 // `roles`: qué roles de staff ven este link. Ajusta esta lista
 // a mano cuando cambien las reglas del negocio — no hay lógica
 // implícita, lo que ves aquí es exactamente quién lo ve.
+//
+// Los links se muestran como botones y, si no caben en el ancho
+// de la pantalla, bajan a una segunda fila (flex-wrap).
 // -------------------------------------------------------------
 const TODOS: RolStaff[] = ['super_admin', 'admin', 'crm', 'atencion']
 
@@ -33,6 +35,9 @@ const ENLACES: { href: string; label: string; icon: any; exact: boolean; roles: 
   { href: '/admin/reinversion', label: 'Reinversión', icon: Repeat2, exact: false, roles: ['super_admin', 'admin'] },
   { href: '/admin/fidelidad', label: 'Fidelidad', icon: Award, exact: false, roles: ['super_admin', 'admin', 'atencion'] },
   { href: '/admin/salud-negocio', label: 'Salud del negocio', icon: Activity, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/configuracion', label: 'Configuración', icon: Settings, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/asistente', label: 'Asistente IA', icon: MessageSquare, exact: false, roles: ['super_admin', 'admin'] },
+  { href: '/admin/aprobaciones', label: 'Aprobaciones IA', icon: Bot, exact: false, roles: ['super_admin', 'admin', 'crm', 'atencion'] },
 ]
 
 export function AdminNav({ rol }: { rol: RolStaff }) {
@@ -40,17 +45,17 @@ export function AdminNav({ rol }: { rol: RolStaff }) {
   const visibles = ENLACES.filter(({ roles }) => roles.includes(rol))
 
   return (
-    <nav className="flex items-center gap-1">
+    <nav className="flex flex-wrap items-center gap-2">
       {visibles.map(({ href, label, icon: Icon, exact }) => {
         const activo = exact ? pathname === href : pathname.startsWith(href)
         return (
           <Link
             key={href}
             href={href}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+            className={`flex items-center gap-2 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm transition-colors ${
               activo
-                ? 'bg-accent/10 text-accent font-medium'
-                : 'text-muted hover:text-ink hover:bg-surface'
+                ? 'border-accent/50 bg-accent/10 font-medium text-accent'
+                : 'border-line bg-surface/40 text-muted hover:border-accent/30 hover:text-ink'
             }`}
           >
             <Icon className="h-4 w-4" strokeWidth={2} />
