@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { Zap } from 'lucide-react'
 import { AdminNav } from '@/components/admin/admin-nav'
 import { OnboardingGate } from '@/components/onboarding/onboarding-gate'
 import { CampanaNotificaciones } from '@/components/notificaciones/campana-notificaciones'
+import { LogoBioenergy } from '@/components/brand/logo-bioenergy'
 
 export default async function AdminLayout({
   children,
@@ -27,13 +27,15 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-base font-sans text-ink">
       <OnboardingGate rol={staff.rol} />
       <header className="border-b border-line bg-surface/60 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-6 py-4">
-          <Zap className="h-5 w-5 text-accent" strokeWidth={2.5} />
-          <span className="font-display text-lg tracking-tight">Mothership</span>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-6 py-4">
+          <LogoBioenergy size="md" />
+          <span className="hidden rounded-full border border-line px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-widest text-muted sm:inline">
+            Panel de administración
+          </span>
           <CampanaNotificaciones />
-          <span className="ml-auto text-sm text-muted">{user.email}</span>
+          <span className="ml-auto truncate text-sm text-muted">{user.email}</span>
         </div>
-        <div className="mx-auto max-w-7xl px-6 pb-3">
+        <div className="mx-auto max-w-7xl px-6 pb-4">
           <AdminNav rol={staff.rol} />
         </div>
       </header>
