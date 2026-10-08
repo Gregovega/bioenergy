@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Wallet, TrendingUp, Clock, PieChart } from 'lucide-react'
 import BilleteraDesglose from '@/components/inversionista/BilleteraDesglose'
 import ToggleReinversion from '@/components/inversionista/toggle-reinversion'
+import MarcadorRecuperacion from '@/components/inversionista/marcador-recuperacion'
 
 function sumarMeses(fechaISO: string, meses: number) {
   const d = new Date(fechaISO)
@@ -89,6 +90,8 @@ export default async function InversionistaPage() {
           </div>
         ))}
       </div>
+
+      <MarcadorRecuperacion />
 
       <ToggleReinversion activaInicial={inversionista?.reinversion_activa ?? true} />
 
